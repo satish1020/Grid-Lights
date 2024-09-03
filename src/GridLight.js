@@ -9,29 +9,32 @@ export default function GridLight() {
   ];
   const [activeCells, setActiveCells] = useState(new Set());
   const [removalInProgress, setRemovalProgress] = useState(false);
+  const [totalActiveCellsNeeded, setTotalActiveCellsNeeded] = useState(0);
 
-  // Calculate total active cells needed for completion.
-  const totalActiveCellsNeeded = matrix.flat().filter(Boolean).length;
+  useEffect(() => {
+    setTotalActiveCellsNeeded(matrix.flat().filter(Boolean).length);
+  }, []);
 
   useEffect(() => {
     // Define the function to remove active cells sequentially inside useEffect
     const removeActiveCellsSequentially = () => {
       const activeCellsArray = Array.from(activeCells);
       let index = activeCellsArray.length - 1; // Start from the last item
-  
+
       const removeNext = () => {
         if (index >= 0) {
           setActiveCells(new Set(activeCellsArray.slice(0, index)));
+          // setActiveCells(activeCellsArray.pop())
           index--; // Move to the previous item
           setTimeout(removeNext, 300);
         } else {
           setRemovalProgress(false);
         }
       };
-  
+
       removeNext();
     };
-  
+
     // Check if all active cells are selected and removal is not in progress, then start the removal process
     if (activeCells.size === totalActiveCellsNeeded && !removalInProgress) {
       setRemovalProgress(true);
