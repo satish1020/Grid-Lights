@@ -14,12 +14,30 @@ export default function GridLight() {
   const totalActiveCellsNeeded = matrix.flat().filter(Boolean).length;
 
   useEffect(() => {
-    // If all active cells are selected, start removal process.
+    // Define the function to remove active cells sequentially inside useEffect
+    const removeActiveCellsSequentially = () => {
+      const activeCellsArray = Array.from(activeCells);
+      let index = activeCellsArray.length - 1; // Start from the last item
+  
+      const removeNext = () => {
+        if (index >= 0) {
+          setActiveCells(new Set(activeCellsArray.slice(0, index)));
+          index--; // Move to the previous item
+          setTimeout(removeNext, 300);
+        } else {
+          setRemovalProgress(false);
+        }
+      };
+  
+      removeNext();
+    };
+  
+    // Check if all active cells are selected and removal is not in progress, then start the removal process
     if (activeCells.size === totalActiveCellsNeeded && !removalInProgress) {
       setRemovalProgress(true);
-      removeActiveCellsSequentially();
+      setTimeout(removeActiveCellsSequentially, 300);
     }
-  }, [activeCells, removalInProgress]);
+  }, [activeCells, removalInProgress, totalActiveCellsNeeded]);
 
   const handleCellClick = (cellKey) => {
     setActiveCells((prev) => {
@@ -30,20 +48,6 @@ export default function GridLight() {
       return newSet;
     });
   };
-
-  const removeActiveCellsSequentially = useCallback(() => {
-    const activeCellsArray = Array.from(activeCells);
-    const removeNext = () => {
-      if (activeCellsArray.length > 0) {
-        setActiveCells(new Set(activeCellsArray.slice(0, -1)));
-        activeCellsArray.pop();
-        setTimeout(removeNext, 200);
-      } else {
-        setRemovalProgress(false);
-      }
-    };
-    removeNext();
-  }, [activeCells]);
 
   const renderCellView = (row, rowIndex) => {
     return (
